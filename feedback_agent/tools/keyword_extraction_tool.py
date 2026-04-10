@@ -10,5 +10,4 @@ STOPWORDS = {
 def extract_keywords(text: str) -> List[str]:
     tokens = re.findall(r"[a-zA-Z]+", text.lower())
     keywords = [t for t in tokens if len(t) > 2 and t not in STOPWORDS]
-    # return deduplicated list preserving order
     return list(dict.fromkeys(keywords))
