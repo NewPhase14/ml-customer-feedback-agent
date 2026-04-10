@@ -10,11 +10,9 @@ def create_feedback_analysis_agent() -> ConversableAgent:
     agent = ConversableAgent(
         name="Feedback Analysis Agent",
         system_message="You are a helpful AI assistant. "
-                      "You can perform sentiment analysis on customer feedback. "
-                      "You can read customer feedback using the feedback_reader tool. It will return a list of feedback, that consists of id, text, and source. "
-                      "Given a customer feedback, you can use the sentiment_analysis tool to analyze the sentiment. "
-                      # "You can also categorize the feedback into themes using the categorization tool. "
-                      # "You can also extract keywords from the feedback using the keyword_extraction tool. "
+                      "You can read customer feedback using the feedback_reader tool. It will return a list of feedback, that consists of id & text. "
+                      "You can also categorize the feedback into themes using the categorization tool. "
+                      "You can also extract keywords from the feedback using the keyword_extraction tool. "
                       "Don't include any other text in your response. "
                       "Return 'TERMINATE' when the task is done.",
         llm_config=LLM_CONFIG,
@@ -22,9 +20,9 @@ def create_feedback_analysis_agent() -> ConversableAgent:
 
     # add the tools to the agent
     agent.register_for_llm(name="feedback_reader", description="Read customer feedback")(query_feedback)
-    agent.register_for_llm(name="sentiment_analysis", description="Analyze the sentiment of a customer feedback")(analyze_sentiment)
-    # agent.register_for_llm(name="categorization", description="Categorize feedback into themes")(categorize_feedback)
-    # agent.register_for_llm(name="keyword_extraction", description="Extract keywords from a customer feedback")(extract_keywords)
+    ##agent.register_for_llm(name="sentiment_analysis", description="Analyze the sentiment of a customer feedback")(analyze_sentiment)
+    agent.register_for_llm(name="categorization", description="Categorize feedback into themes")(categorize_feedback)
+    agent.register_for_llm(name="keyword_extraction", description="Extract keywords from a customer feedback")(extract_keywords)
 
     return agent
 
@@ -36,9 +34,9 @@ def create_user_proxy():
         human_input_mode="NEVER",
     )
     user_proxy.register_for_execution(name="feedback_reader")(query_feedback)
-    user_proxy.register_for_execution(name="sentiment_analysis")(analyze_sentiment)
-    # user_proxy.register_for_execution(name="categorization")(categorize_feedback)
-    # user_proxy.register_for_execution(name="keyword_extraction")(extract_keywords)
+    ##user_proxy.register_for_execution(name="sentiment_analysis")(analyze_sentiment)
+    user_proxy.register_for_execution(name="categorization")(categorize_feedback)
+    user_proxy.register_for_execution(name="keyword_extraction")(extract_keywords)
     return user_proxy
 
 
@@ -49,15 +47,15 @@ def main():
         feedback_analysis_agent, 
         message="""
                 1. Read feedback from the feedback store, using the feedback_reader tool.
-                2. For each feedback item, analyze the sentiment using the sentiment_analysis tool.
-                3. Create a JSON object that contains the feedback id and the analyzed sentiment.
-                Example:
+                2. For each feedback item, analyze the categories using the categorization tool. 
+                3. Assemble the results into a single valid JSON array. Each object in the array must ONLY contain the keys: 'id', 'text', and 'categories'.
+                4. Output NOTHING but the raw JSON array. Exclude all other text, explanations, or markdown code blocks.
+                
+                Expected layout:
                 [
-                    {"id": "1", "sentiment": "positive"},
-                    {"id": "2", "sentiment": "negative"},
-                    {"id": "3", "sentiment": "neutral"}
+                    {"id": 1, "text": "Delivery is too slow and the package arrived late.", "categories": ["delivery"]},
+                    {"id": 2, "text": "The price is too expensive and the app crashes.", "categories": ["pricing"]}
                 ]
-                4. Return the JSON object.
                 """
     )
 
