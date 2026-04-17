@@ -1,37 +1,22 @@
-from typing import List, TypedDict, Literal
+from csv import DictReader
+from pathlib import Path
+from typing import List, TypedDict
 
 class Feedback(TypedDict):
-    id: str
+    id: int
     text: str
-    source: Literal["email", "chat", "survey"]
 
-feedback_store: List[Feedback] = [
-    {
-        "id": "1",
-        "text": "I love the product!",
-        "source": "email"
-    },
-    {
-        "id": "2",
-        "text": "The product is great!",
-        "source": "chat"
-    },
-    {
-        "id": "3",
-        "text": "I had a great experience with the product.",
-        "source": "survey"
-    },
-    {
-        "id": "4",
-        "text": "I had a bad experience with the product.",
-        "source": "survey"
-    },
-    {
-        "id": "5",
-        "text": "I had a great experience with the product.",
-        "source": "survey"
-    }
-]
+CSV_PATH = Path(__file__).resolve().parents[1] / "feedback.csv"
 
 def query_feedback() -> List[Feedback]:
+ feedback_store: List[Feedback] = []
+
+ with open(CSV_PATH, encoding="utf-8") as csvfile:
+    reader = DictReader(csvfile)
+    for row in reader:
+        feedback_store.append(
+        {"id": int(row["id"]),
+        "text": row["feedback"],
+         })
+
     return feedback_store
